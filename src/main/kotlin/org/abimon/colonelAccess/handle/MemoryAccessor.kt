@@ -1,6 +1,6 @@
 package org.abimon.colonelAccess.handle
 
-import com.sun.jna.Memory
+import com.sun.jna.Pointer
 import org.abimon.colonelAccess.osx.OSXMemoryAccessor
 import org.abimon.colonelAccess.win.WindowsMemoryAccessor
 import java.util.*
@@ -8,7 +8,7 @@ import java.util.*
 
 
 abstract class MemoryAccessor<out E>(pid: Int) {
-    abstract fun readMemory(address: Long, size: Int): Pair<Memory?, E?>
+    abstract fun readMemory(address: Long, size: Int): Pair<Pointer?, E?>
 
     fun readInt(address: Long): Pair<Int?, E?> {
         val (memory, error) = readMemory(address, 4)

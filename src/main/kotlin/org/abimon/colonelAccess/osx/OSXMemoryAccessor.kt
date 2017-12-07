@@ -1,7 +1,8 @@
 package org.abimon.colonelAccess.osx
 
-import com.sun.jna.Memory
+import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
+import com.sun.jna.ptr.PointerByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
 
 class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn>(pid) {
@@ -14,12 +15,12 @@ class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn>(pid) {
         return@run taskReference.value
     }
 
-    override fun readMemory(address: Long, size: Int): Pair<Memory?, KernReturn?> {
-        val data = Memory(size.toLong())
+    override fun readMemory(address: Long, size: Int): Pair<Pointer?, KernReturn?> {
+        val data = PointerByReference()
         val sizeReference = IntByReference()
 
         val readResponse = KernReturn.valueOf(SystemB.INSTANCE.vm_read(task, address, size, data, sizeReference))
 
-        return data to readResponse
+        return data.value to readResponse
     }
 }
