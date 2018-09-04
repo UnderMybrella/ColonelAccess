@@ -6,14 +6,14 @@ import org.abimon.colonelAccess.win.WindowsMemoryAccessor
 import java.util.*
 
 abstract class MemoryAccessor<out E>(pid: Int) {
-    abstract fun readMemory(address: Long, size: Int): Pair<Pointer?, E?>
+    abstract fun readMemory(address: Long, size: Long): Pair<Pointer?, E?>
 
-    fun readInt(address: Long): Pair<Int?, E?> {
+    open fun readInt(address: Long): Pair<Int?, E?> {
         val (memory, error) = readMemory(address, 4)
         return memory?.getInt(0) to error
     }
 
-    fun readInts(vararg addresses: Long): Map<Long, Pair<Int?, E?>> =
+    open fun readInts(vararg addresses: Long): Map<Long, Pair<Int?, E?>> =
             addresses.map { addr -> addr to readInt(addr) }.toMap()
 
     companion object {
