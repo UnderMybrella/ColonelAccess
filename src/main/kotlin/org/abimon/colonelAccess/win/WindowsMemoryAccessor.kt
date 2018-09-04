@@ -9,7 +9,7 @@ import com.sun.jna.platform.win32.WinNT
 import com.sun.jna.ptr.IntByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
 
-open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit>(pid) {
+open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
     private val process: WinNT.HANDLE = Kernel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
     private val baseAddress: Long
 
@@ -20,6 +20,10 @@ open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit>(pid) {
         Kernel32.INSTANCE.ReadProcessMemory(process, Pointer.createConstant(baseAddress + address), output, size.toInt(), read)
 
         return output to Unit
+    }
+
+    override fun deallocateMemory(pointer: Memory): Unit? {
+        return Unit
     }
 
     init {
