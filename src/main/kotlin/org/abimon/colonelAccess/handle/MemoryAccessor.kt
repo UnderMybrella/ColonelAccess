@@ -18,13 +18,12 @@ abstract class MemoryAccessor<out E, P: Pointer>(pid: Int) {
             addresses.map { addr -> addr to readInt(addr) }.toMap()
 
     companion object {
-        @Suppress("UNCHECKED_CAST")
-        fun <E, P: Pointer> accessorForSystem(pid: Int): MemoryAccessor<E, P> {
+        fun accessorForSystem(pid: Int): MemoryAccessor<*, *> {
             val os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH)
             if (os.indexOf("mac") >= 0 || os.indexOf("darwin") >= 0) {
-                return OSXMemoryAccessor(pid) as MemoryAccessor<E, P>
+                return OSXMemoryAccessor(pid)
             } else if (os.indexOf("win") >= 0) {
-                return WindowsMemoryAccessor(pid) as MemoryAccessor<E, P>
+                return WindowsMemoryAccessor(pid)
             } else if (os.indexOf("nux") >= 0) {
                 //return LinuxMemoryAccessor(pid)
             }
