@@ -21,7 +21,7 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
         val readResponse = KernReturn.valueOf(SystemB.INSTANCE.vm_read(task, address, size, data, sizeReference))
 
-        return MacOSPointer(data.value, sizeReference.value) to readResponse
+        return (data.value?.let { pointer -> MacOSPointer(pointer, sizeReference.value) }) to readResponse
     }
 
     override fun readInt(address: Long): Pair<Int?, KernReturn?> {
