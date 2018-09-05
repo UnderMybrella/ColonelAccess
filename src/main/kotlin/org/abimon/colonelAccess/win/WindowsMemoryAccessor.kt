@@ -22,8 +22,8 @@ open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
         return output to Unit
     }
 
-    override fun deallocateMemory(pointer: Memory): Unit? {
-        return Unit
+    override fun deallocateMemory(pointer: Memory) {
+
     }
 
     init {
