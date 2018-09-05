@@ -19,7 +19,7 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
         val data = PointerByReference()
         val sizeReference = LongByReference()
 
-        val readResponse = KernReturn.valueOf(SystemB.INSTANCE.vm_read(task, address, size, data, sizeReference))
+        val readResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_read(task, address, size, data, sizeReference))
 
         return (data.value?.let { pointer -> MacOSPointer(pointer, sizeReference.value) }) to readResponse
     }

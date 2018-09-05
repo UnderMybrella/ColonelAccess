@@ -24,6 +24,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
     compile 'net.java.dev.jna:jna:4.5.0'
     compile 'net.java.dev.jna:jna-platform:4.5.0'
 
