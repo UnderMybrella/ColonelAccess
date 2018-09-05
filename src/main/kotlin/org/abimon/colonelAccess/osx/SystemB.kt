@@ -8,7 +8,7 @@ import com.sun.jna.ptr.PointerByReference
 interface SystemB: Library {
     companion object {
         val SAFE_INSTANCE: SystemB? = try { Native.loadLibrary("System.B", SystemB::class.java) } catch (ule: UnsatisfiedLinkError) { null }
-        val INSTANCE: SystemB = SAFE_INSTANCE!!
+        val INSTANCE: SystemB by lazy { SAFE_INSTANCE!! }
 
         val PATH_MAX = 1024L
 
