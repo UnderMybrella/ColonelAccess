@@ -30,6 +30,7 @@ interface SystemB: Library {
 
     fun task_for_pid(target_tport: Int, pid: Int, t: IntByReference): Int
     fun mach_task_self(): Int
+    fun getpid(): Int
 
     fun mach_vm_read(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
     fun mach_vm_write(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
@@ -38,6 +39,7 @@ interface SystemB: Library {
     fun mach_vm_deallocate(target_task: Int, address: Long, size: Long): Int
 
     fun mach_vm_region(target_task: Int, address: LongByReference, size: LongByReference, flavor: Int, info: Structure, info_count: LongByReference, object_name: IntByReference): Int
+    fun vm_region_recurse_64(target_task: Int, address: LongByReference, size: LongByReference, depth: IntByReference, info: Structure, info_count: LongByReference): Int
 
     fun proc_pidpath(pid: Int, buffer: Pointer, buffersize: Int): Int
     fun proc_regionfilename(pid: Int, address: Long, buffer: Pointer, buffersize: Int): Int

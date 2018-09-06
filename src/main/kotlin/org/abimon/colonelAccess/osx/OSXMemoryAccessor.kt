@@ -6,6 +6,7 @@ import com.sun.jna.ptr.PointerByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
+import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
 
 open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
     private val task: Int = run {
@@ -56,5 +57,32 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
         }
 
         return null to regionSuccessCode
+    }
+
+    override fun getAllRegions(): Array<MemoryRegion> {
+        val regions: MutableList<MemoryRegion> = ArrayList()
+
+        val address = LongByReference(0)
+        val size = LongByReference()
+
+        val info = VMRegionSubmapInfo64()
+        val infoCount = LongByReference(info.size().toLong() / 4)
+
+        val depth = IntByReference(0)
+
+        var kret: KernReturn? = KernReturn.KERN_SUCCESS
+
+        while (kret == KernReturn.KERN_SUCCESS) {
+            kret = KernReturn.valueOf(SystemB.INSTANCE.vm_region_recurse_64(task, address, size, depth, info, infoCount))
+
+            if (info.is_submap) {
+                depth.value++
+            }
+
+            regions.add(MemoryRegion(address.value, size.value, info.protection, SystemB.proc_regionfilename(pid, address.value).first))
+            address.value += size.value
+        }
+
+        return regions.toTypedArray()
     }
 }
