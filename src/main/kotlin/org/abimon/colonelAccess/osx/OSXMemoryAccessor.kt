@@ -8,7 +8,7 @@ import org.abimon.colonelAccess.handle.MemoryRegion
 import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
 
-open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
+open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid, KernReturn::class.java, MacOSPointer::class.java) {
     private val task: Int = run {
         val taskReference = IntByReference()
         val successCode = KernReturn.valueOf(SystemB.INSTANCE.task_for_pid(SystemB.INSTANCE.mach_task_self(), pid, taskReference))!!
@@ -33,11 +33,12 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
         val (memory, error) = readMemory(address, 4)
 
         val num = memory?.getInt(0)
+        memory?.deallocate(task)
 
         return num to error
     }
 
-    override fun deallocateMemory(pointer: MacOSPointer) = pointer.deallocate(task)
+    override fun deallocateOurMemory(pointer: MacOSPointer) = pointer.deallocate(task)
 
     override fun getNextRegion(address: Long): Pair<MemoryRegion?, KernReturn?> {
         val addressReference = LongByReference(address)

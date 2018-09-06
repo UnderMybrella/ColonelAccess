@@ -24,7 +24,7 @@ public class VMRegionSubmapInfo64 extends Structure {
     public boolean is_submap;
     public int behavior;
     public long object_id;
-    public int user_wired_count;
+    public short user_wired_count;
 
     private static final List<String> FIELD_NAMES = Arrays.asList(
             "protection",

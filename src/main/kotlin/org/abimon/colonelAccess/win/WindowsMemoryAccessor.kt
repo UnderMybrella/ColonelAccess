@@ -10,7 +10,7 @@ import com.sun.jna.ptr.IntByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 
-open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
+open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid, Unit::class.java, Memory::class.java) {
     private val process: WinNT.HANDLE = Kernel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
     private val baseAddress: Long
 
