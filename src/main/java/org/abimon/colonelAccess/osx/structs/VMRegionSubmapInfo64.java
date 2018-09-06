@@ -17,9 +17,9 @@ public class VMRegionSubmapInfo64 extends Structure {
     public int pages_swapped_out;
     public int pages_dirtied;
     public int ref_count;
-    public int shadow_depth;
-    public int external_pager;
-    public int share_mode;
+    public short shadow_depth;
+    public byte external_pager;
+    public byte share_mode;
 
     public boolean is_submap;
     public int behavior;
