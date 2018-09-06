@@ -26,8 +26,8 @@ open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid, Un
         return output to Unit
     }
 
-    override fun deallocateMemory(pointer: Memory) {
-
+    override fun deallocateOurMemory(pointer: Memory): Unit? {
+        TODO("Not implemented")
     }
 
     override fun getNextRegion(address: Long): Pair<MemoryRegion?, Unit?> {
