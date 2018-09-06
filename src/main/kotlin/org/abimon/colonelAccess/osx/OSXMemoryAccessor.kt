@@ -4,8 +4,10 @@ import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.LongByReference
 import com.sun.jna.ptr.PointerByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
+import org.abimon.colonelAccess.handle.MemoryRegion
+import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 
-open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
+open class OSXMemoryAccessor(val pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
     private val task: Int = run {
         val taskReference = IntByReference()
         val successCode = KernReturn.valueOf(SystemB.INSTANCE.task_for_pid(SystemB.INSTANCE.mach_task_self(), pid, taskReference))!!
@@ -33,4 +35,24 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
     }
 
     override fun deallocateMemory(pointer: MacOSPointer) = pointer.deallocate(task)
+
+    override fun getNextRegion(address: Long): Pair<MemoryRegion?, KernReturn?> {
+        val addressReference = LongByReference(address)
+        val size = LongByReference()
+
+        val info = VMRegionBasicInfo()
+        val infoCount = LongByReference(info.size().toLong() / 4)
+
+        val objectName = IntByReference(0)
+
+        val regionSuccessCode = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_region(task, addressReference, size, VMRegionFlavor.VM_REGION_BASIC_INFO_64.code, info, infoCount, objectName))
+
+        if (regionSuccessCode == KernReturn.KERN_SUCCESS) {
+            val (detail) = SystemB.proc_regionfilename(pid, addressReference.value)
+
+            return MemoryRegion(addressReference.value, size.value, info.protection, detail) to regionSuccessCode
+        }
+
+        return null to regionSuccessCode
+    }
 }

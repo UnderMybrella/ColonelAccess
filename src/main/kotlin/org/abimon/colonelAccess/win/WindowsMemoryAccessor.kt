@@ -8,6 +8,7 @@ import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinNT
 import com.sun.jna.ptr.IntByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
+import org.abimon.colonelAccess.handle.MemoryRegion
 
 open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
     private val process: WinNT.HANDLE = Kernel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
@@ -24,6 +25,10 @@ open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
 
     override fun deallocateMemory(pointer: Memory) {
 
+    }
+
+    override fun getNextRegion(address: Long): Pair<MemoryRegion?, Unit?> {
+        TODO("Not implemented")
     }
 
     init {

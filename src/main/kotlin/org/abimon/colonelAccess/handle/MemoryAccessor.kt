@@ -4,10 +4,32 @@ import com.sun.jna.Pointer
 import org.abimon.colonelAccess.osx.OSXMemoryAccessor
 import org.abimon.colonelAccess.win.WindowsMemoryAccessor
 import java.util.*
+import kotlin.collections.ArrayList
 
 abstract class MemoryAccessor<out E, P: Pointer>(pid: Int) {
     abstract fun readMemory(address: Long, size: Long): Pair<P?, E?>
     abstract fun deallocateMemory(pointer: P): E?
+
+    abstract fun getNextRegion(address: Long): Pair<MemoryRegion?, E?>
+
+    open fun getAllRegions(): Array<MemoryRegion> {
+        val regions: MutableList<MemoryRegion> = ArrayList()
+
+        var address = 0L
+
+        while (address > 0) {
+            val (region, kret) = getNextRegion(address)
+
+            if (region == null) {
+                address = -1
+            } else {
+                regions.add(region)
+                address = region.start + region.size
+            }
+        }
+
+        return regions.toTypedArray()
+    }
 
     open fun readInt(address: Long): Pair<Int?, E?> {
         val (memory, error) = readMemory(address, 4)
