@@ -15,6 +15,8 @@ abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val er
 
     abstract fun getNextRegion(address: Long): Pair<MemoryRegion?, E?>
 
+//    abstract fun remapMemory(address: Long, size: Long): Pair<P?, E?>
+
     open fun getAllRegions(): Array<MemoryRegion> {
         val regions: MutableList<MemoryRegion> = ArrayList()
 

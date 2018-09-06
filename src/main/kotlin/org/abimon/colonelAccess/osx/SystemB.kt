@@ -38,6 +38,8 @@ interface SystemB: Library {
     fun mach_vm_allocate(target_task: Int, address: Long, size: Long, anywhere: Boolean): Int
     fun mach_vm_deallocate(target_task: Int, address: Long, size: Long): Int
 
+    fun mach_vm_remap(target_task: Int, target_address: LongByReference, size: Long, mask: Long, anywhere: Boolean, source_task: Int, source_address: Long, copy: Boolean, cur_protection: IntByReference, max_protection: IntByReference, inheritance: Int): Int
+
     fun mach_vm_region(target_task: Int, address: LongByReference, size: LongByReference, flavor: Int, info: Structure, info_count: LongByReference, object_name: IntByReference): Int
     fun vm_region_recurse_64(target_task: Int, address: LongByReference, size: LongByReference, depth: IntByReference, info: Structure, info_count: LongByReference): Int
 
