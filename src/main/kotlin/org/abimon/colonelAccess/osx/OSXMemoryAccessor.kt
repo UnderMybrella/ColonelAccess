@@ -7,7 +7,7 @@ import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 
-open class OSXMemoryAccessor(val pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
+open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid) {
     private val task: Int = run {
         val taskReference = IntByReference()
         val successCode = KernReturn.valueOf(SystemB.INSTANCE.task_for_pid(SystemB.INSTANCE.mach_task_self(), pid, taskReference))!!
@@ -16,6 +16,8 @@ open class OSXMemoryAccessor(val pid: Int): MemoryAccessor<KernReturn, MacOSPoin
 
         return@run taskReference.value
     }
+
+    override val detail: String = SystemB.proc_pidpath(pid).first
 
     override fun readMemory(address: Long, size: Long): Pair<MacOSPointer?, KernReturn?> {
         val data = PointerByReference()

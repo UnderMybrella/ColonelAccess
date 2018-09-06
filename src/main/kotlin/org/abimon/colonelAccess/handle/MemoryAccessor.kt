@@ -2,11 +2,14 @@ package org.abimon.colonelAccess.handle
 
 import com.sun.jna.Pointer
 import org.abimon.colonelAccess.osx.OSXMemoryAccessor
+import org.abimon.colonelAccess.osx.SystemB
 import org.abimon.colonelAccess.win.WindowsMemoryAccessor
 import java.util.*
 import kotlin.collections.ArrayList
 
-abstract class MemoryAccessor<out E, P: Pointer>(pid: Int) {
+abstract class MemoryAccessor<out E, P: Pointer>(open val pid: Int) {
+    abstract val detail: String
+
     abstract fun readMemory(address: Long, size: Long): Pair<P?, E?>
     abstract fun deallocateMemory(pointer: P): E?
 
@@ -51,6 +54,19 @@ abstract class MemoryAccessor<out E, P: Pointer>(pid: Int) {
             }
 
             TODO("Implement memory accessors for $os")
+        }
+
+        fun detailForPID(pid: Int): String {
+            val os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH)
+            if (os.indexOf("mac") >= 0 || os.indexOf("darwin") >= 0) {
+                return SystemB.proc_pidpath(pid).first
+            } else if (os.indexOf("win") >= 0) {
+                //return WindowsMemoryAccessor(pid)
+            } else if (os.indexOf("nux") >= 0) {
+                //return LinuxMemoryAccessor(pid)
+            }
+
+            TODO("Implement pid details for $os")
         }
     }
 }

@@ -14,6 +14,9 @@ open class WindowsMemoryAccessor(pid: Int): MemoryAccessor<Unit, Memory>(pid) {
     private val process: WinNT.HANDLE = Kernel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
     private val baseAddress: Long
 
+    override val detail: String
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
     override fun readMemory(address: Long, size: Long): Pair<Memory?, Unit?> {
         val read = IntByReference()
         val output = Memory(size)
