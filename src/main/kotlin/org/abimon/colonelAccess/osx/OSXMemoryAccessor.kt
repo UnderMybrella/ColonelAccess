@@ -68,7 +68,7 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
         val info = VMRegionSubmapInfo64()
         val infoCount = LongByReference(info.size().toLong() / 4)
 
-        val depth = IntByReference(0)
+        val depth = IntByReference(1)
 
         var kret: KernReturn? = KernReturn.KERN_SUCCESS
 

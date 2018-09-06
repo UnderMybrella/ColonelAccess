@@ -49,10 +49,9 @@ class SystemBTests {
         val info = VMRegionSubmapInfo64()
         val infoCount = LongByReference(info.size().toLong() / 4)
 
-        val depth = IntByReference(0)
+        val depth = IntByReference(1)
 
         val kret = KernReturn.valueOf(systemB.vm_region_recurse_64(task, address, size, depth, info, infoCount))
-
         assert(kret == KernReturn.KERN_SUCCESS)
     }
 }
