@@ -17,7 +17,7 @@ abstract class MemoryAccessor<out E, P: Pointer>(pid: Int) {
 
         var address = 0L
 
-        while (address > 0) {
+        while (address >= 0) {
             val (region, kret) = getNextRegion(address)
 
             if (region == null) {
