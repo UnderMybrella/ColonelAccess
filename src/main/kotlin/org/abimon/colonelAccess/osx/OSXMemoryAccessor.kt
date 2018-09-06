@@ -9,7 +9,7 @@ import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
 
 open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid, KernReturn::class.java, MacOSPointer::class.java) {
-    private val task: Int = run {
+    protected val task: Int = run {
         val taskReference = IntByReference()
         val successCode = KernReturn.valueOf(SystemB.INSTANCE.task_for_pid(SystemB.INSTANCE.mach_task_self(), pid, taskReference))!!
         if(successCode != KernReturn.KERN_SUCCESS)
