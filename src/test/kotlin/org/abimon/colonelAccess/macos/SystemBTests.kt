@@ -2,6 +2,7 @@ package org.abimon.colonelAccess.macos
 
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.LongByReference
+import com.sun.jna.ptr.PointerByReference
 import org.abimon.colonelAccess.osx.KernReturn
 import org.abimon.colonelAccess.osx.SystemB
 import org.abimon.colonelAccess.osx.VMInherit
@@ -11,6 +12,38 @@ import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
 import org.junit.Test
 
 class SystemBTests {
+
+    @Test
+    fun mach_vm_read() {
+        val systemB = SystemB.SAFE_INSTANCE
+        if (systemB == null) {
+            println("Not running on MacOS, returning")
+            return
+        }
+
+        val task = systemB.mach_task_self()
+
+        val address = LongByReference(0)
+        val size = LongByReference()
+
+        val info = VMRegionBasicInfo()
+        val infoCount = LongByReference(info.size().toLong() / 4)
+
+        val objectName = IntByReference(0)
+
+        val regionSuccessCode = KernReturn.valueOf(systemB.mach_vm_region(task, address, size, VMRegionFlavor.VM_REGION_BASIC_INFO_64.code, info, infoCount, objectName))
+
+        assert(regionSuccessCode == KernReturn.KERN_SUCCESS)
+
+        val data = PointerByReference()
+        val sizeReference = LongByReference()
+
+        val readResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_read(task, address.value, size.value, data, sizeReference))
+
+        println(readResponse)
+        println(sizeReference.value)
+    }
+
     @Test
     fun mach_vm_region() {
         val systemB = SystemB.SAFE_INSTANCE
