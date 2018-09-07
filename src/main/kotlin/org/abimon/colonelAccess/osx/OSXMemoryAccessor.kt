@@ -30,7 +30,12 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
             val kret = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_remap(ourTask, addr, size, 0L, 1, task, address, true, curProtection, maxProtection, VMInherit.VM_INHERIT_SHARE.code) and 0x000000FF)
 
-            return MacOSPointer(addr.value, size) to kret
+            if (kret != KernReturn.KERN_SUCCESS) {
+                SystemB.INSTANCE.mach_vm_deallocate(task, addr.value, size)
+                return null to kret
+            } else {
+                return MacOSPointer(addr.value, size) to kret
+            }
         } else if (allocateResponse != KernReturn.KERN_NO_SPACE) {
             println("Allocating failed with $allocateResponse, trying a manual read")
             val data = PointerByReference()
