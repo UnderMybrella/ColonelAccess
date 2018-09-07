@@ -23,7 +23,7 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
     override fun readMemory(address: Long, size: Long): Pair<MacOSPointer?, KernReturn?> {
         val addr = LongByReference()
-        val allocateResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_allocate(ourTask, addr, size, true) and 0x000000FF)
+        val allocateResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_allocate(ourTask, addr, size, SystemB.VM_FLAGS_ANYWHERE) and 0x000000FF)
         if (allocateResponse == KernReturn.KERN_SUCCESS) {
             val curProtection = IntByReference()
             val maxProtection = IntByReference()

@@ -39,7 +39,7 @@ interface SystemB: Library {
     fun mach_vm_read(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
     fun mach_vm_write(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
 
-    fun mach_vm_allocate(target_task: Int, address: LongByReference, size: Long, anywhere: Boolean): Int
+    fun mach_vm_allocate(target_task: Int, address: LongByReference, size: Long, flags: Int): Int
     fun mach_vm_deallocate(target_task: Int, address: Long, size: Long): Int
 
     fun mach_vm_remap(target_task: Int, target_address: LongByReference, size: Long, mask: Long, flags: Int, source_task: Int, source_address: Long, copy: Boolean, cur_protection: IntByReference, max_protection: IntByReference, inheritance: Int): Int
