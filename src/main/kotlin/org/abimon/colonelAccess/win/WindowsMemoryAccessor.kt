@@ -1,13 +1,12 @@
 package org.abimon.colonelAccess.win
 
-import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.*
 import com.sun.jna.ptr.IntByReference
 import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 
-open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, Memory>(pid, Int::class.java, Memory::class.java) {
+open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, WinMemory>(pid, Int::class.java, WinMemory::class.java) {
     protected val process: WinNT.HANDLE = Colonel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_VM_WRITE or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
             ?: throw IllegalAccessException("Error: No access granted to gain read permissions for $pid")
     protected val baseAddress: Long
@@ -18,20 +17,23 @@ open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, Memory>(pid, In
         return@run processNameArray.copyOfRange(0, size).joinToString("")
     }
 
-    override fun readMemory(address: Long, size: Long): Pair<Memory?, Int?> {
+    override fun readMemory(address: Long, size: Long): Pair<WinMemory?, Int?> {
         val read = IntByReference()
-        val output = Memory(size)
+        val output = WinMemory(size)
 
         if (Colonel32.INSTANCE.ReadProcessMemory(process, Pointer(baseAddress + address), output, size.toInt(), read))
             return output to null
         else if (Colonel32.INSTANCE.GetLastError() == 299) { //ERROR_PARTIAL_COPY
-            return (output.share(0, read.value.toLong()) as? Memory) to null
+            output.readSize = read.value.toLong()
+            return output to null
         }
         return null to Colonel32.INSTANCE.GetLastError()
     }
 
-    override fun deallocateOurMemory(pointer: Memory): Int? {
-        return null //JNA should take care of it automatically
+    override fun deallocateOurMemory(pointer: WinMemory): Int? {
+        pointer.dispose()
+
+        return null
     }
 
     override fun getNextRegion(address: Long): Pair<MemoryRegion?, Int?> {

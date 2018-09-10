@@ -48,7 +48,12 @@ abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val er
 
     open fun readInt(address: Long): Pair<Int?, E?> {
         val (memory, error) = readMemory(address, 4)
-        return memory?.getInt(0) to error
+        val int = memory?.getInt(0)
+
+        if (memory != null)
+            deallocateOurMemory(memory)
+
+        return int to error
     }
 
     open fun readInts(vararg addresses: Long): Map<Long, Pair<Int?, E?>> =
