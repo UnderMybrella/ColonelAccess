@@ -1,8 +1,11 @@
 package org.abimon.colonelAccess.handle
 
 import com.sun.jna.Pointer
+import com.sun.jna.platform.win32.Kernel32
+import com.sun.jna.platform.win32.Psapi
 import org.abimon.colonelAccess.osx.OSXMemoryAccessor
 import org.abimon.colonelAccess.osx.SystemB
+import org.abimon.colonelAccess.win.Colonel32
 import org.abimon.colonelAccess.win.WindowsMemoryAccessor
 import java.util.*
 import kotlin.collections.ArrayList
@@ -70,7 +73,10 @@ abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val er
             if (os.indexOf("mac") >= 0 || os.indexOf("darwin") >= 0) {
                 return SystemB.proc_pidpath(pid).first
             } else if (os.indexOf("win") >= 0) {
-                //return WindowsMemoryAccessor(pid)
+                val handle = Colonel32.INSTANCE.OpenProcess(Kernel32.PROCESS_QUERY_LIMITED_INFORMATION, true, pid)
+                val processNameArray = CharArray(1024)
+                val size = Psapi.INSTANCE.GetModuleFileNameExW(handle, null, processNameArray, processNameArray.size)
+                return processNameArray.copyOfRange(0, size).joinToString("")
             } else if (os.indexOf("nux") >= 0) {
                 //return LinuxMemoryAccessor(pid)
             }
@@ -83,7 +89,7 @@ abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val er
             if (os.indexOf("mac") >= 0 || os.indexOf("darwin") >= 0) {
                 return@lazy SystemB.INSTANCE.getpid()
             } else if (os.indexOf("win") >= 0) {
-                //return WindowsMemoryAccessor(pid)
+                return@lazy Kernel32.INSTANCE.GetCurrentProcessId()
             } else if (os.indexOf("nux") >= 0) {
                 //return LinuxMemoryAccessor(pid)
             }
