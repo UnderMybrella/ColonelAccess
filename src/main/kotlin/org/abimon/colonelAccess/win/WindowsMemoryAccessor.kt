@@ -17,19 +17,19 @@ open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, WinMemory>(pid,
         return@run processNameArray.copyOfRange(0, size).joinToString("")
     }
 
-    override fun readMemory(address: Long, size: Long): Pair<WinMemory?, Int?> {
+    override fun readMemory(address: Long, size: Long): Triple<WinMemory?, Int?, Long?> {
         val read = IntByReference()
         val output = WinMemory(size)
 
         if (Colonel32.INSTANCE.ReadProcessMemory(process, Pointer(baseAddress + address), output, size.toInt(), read))
-            return output to null
+            return Triple(output, null, read.value.toLong())
         else if (Colonel32.INSTANCE.GetLastError() == 299) { //ERROR_PARTIAL_COPY
             output.readSize = read.value.toLong()
-            return output to null
+            return Triple(output, null, read.value.toLong())
         }
 
         output.dispose()
-        return null to Colonel32.INSTANCE.GetLastError()
+        return Triple(null, Colonel32.INSTANCE.GetLastError(), 0L)
     }
 
     override fun deallocateOurMemory(pointer: WinMemory): Int? {

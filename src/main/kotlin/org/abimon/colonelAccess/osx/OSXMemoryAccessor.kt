@@ -21,7 +21,7 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
     override val detail: String = SystemB.proc_pidpath(pid).first
 
-    override fun readMemory(address: Long, size: Long): Pair<MacOSPointer?, KernReturn?> {
+    override fun readMemory(address: Long, size: Long): Triple<MacOSPointer?, KernReturn?, Long?> {
         val addr = LongByReference()
         val allocateResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_allocate(ourTask, addr, size, SystemB.VM_FLAGS_ANYWHERE) and 0x000000FF)
         if (allocateResponse == KernReturn.KERN_SUCCESS) {
@@ -32,9 +32,9 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
             if (kret != KernReturn.KERN_SUCCESS) {
                 SystemB.INSTANCE.mach_vm_deallocate(task, addr.value, size)
-                return null to kret
+                return Triple(null, kret, null)
             } else {
-                return MacOSPointer(addr.value, size) to kret
+                return Triple(MacOSPointer(addr.value, size), kret, size)
             }
         } else if (allocateResponse != KernReturn.KERN_NO_SPACE) {
             println("Allocating failed with $allocateResponse, trying a manual read")
@@ -43,9 +43,9 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
 
             val readResponse = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_read(task, address, size, data, sizeReference) and 0x000000FF)
 
-            return (data.value?.let { pointer -> MacOSPointer(pointer, sizeReference.value) }) to readResponse
+            return Triple((data.value?.let { pointer -> MacOSPointer(pointer, sizeReference.value) }), readResponse, sizeReference.value)
         } else {
-            return null to allocateResponse
+            return Triple(null, allocateResponse, null)
         }
     }
 

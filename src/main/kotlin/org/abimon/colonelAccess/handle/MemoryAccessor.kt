@@ -13,7 +13,7 @@ import kotlin.collections.ArrayList
 abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val errorClass: Class<E>, open val pointerClass: Class<P>) {
     abstract val detail: String
 
-    abstract fun readMemory(address: Long, size: Long): Pair<P?, E?>
+    abstract fun readMemory(address: Long, size: Long): Triple<P?, E?, Long?>
     abstract fun deallocateOurMemory(pointer: P): E?
 
     abstract fun getNextRegion(address: Long): Pair<MemoryRegion?, E?>
