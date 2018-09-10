@@ -8,7 +8,7 @@ import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 
 open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, Memory>(pid, Int::class.java, Memory::class.java) {
-    protected val process: WinNT.HANDLE = Colonel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
+    protected val process: WinNT.HANDLE = Colonel32.INSTANCE.OpenProcess(Kernel32.PROCESS_VM_READ or Kernel32.PROCESS_VM_WRITE or Kernel32.PROCESS_QUERY_INFORMATION, true, pid)
             ?: throw IllegalAccessException("Error: No access granted to gain read permissions for $pid")
     protected val baseAddress: Long
 
