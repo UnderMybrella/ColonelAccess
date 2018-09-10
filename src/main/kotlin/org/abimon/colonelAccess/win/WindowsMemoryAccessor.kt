@@ -24,6 +24,9 @@ open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, Memory>(pid, In
 
         if (Colonel32.INSTANCE.ReadProcessMemory(process, Pointer(baseAddress + address), output, size.toInt(), read))
             return output to null
+        else if (Colonel32.INSTANCE.GetLastError() == 299) { //ERROR_PARTIAL_COPY
+            return (output.share(0, read.value.toLong()) as? Memory) to null
+        }
         return null to Colonel32.INSTANCE.GetLastError()
     }
 
