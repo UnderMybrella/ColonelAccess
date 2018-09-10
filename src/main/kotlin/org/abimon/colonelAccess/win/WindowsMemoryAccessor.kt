@@ -27,6 +27,8 @@ open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, WinMemory>(pid,
             output.readSize = read.value.toLong()
             return output to null
         }
+
+        output.dispose()
         return null to Colonel32.INSTANCE.GetLastError()
     }
 
