@@ -1,5 +1,6 @@
 package org.abimon.colonelAccess.handle
 
+import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.Kernel32
 import com.sun.jna.platform.win32.Psapi
@@ -7,13 +8,15 @@ import org.abimon.colonelAccess.osx.OSXMemoryAccessor
 import org.abimon.colonelAccess.osx.SystemB
 import org.abimon.colonelAccess.win.Colonel32
 import org.abimon.colonelAccess.win.WindowsMemoryAccessor
+import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.ArrayList
 
-abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val errorClass: Class<E>, open val pointerClass: Class<P>) {
+abstract class MemoryAccessor<E : Any, P : Pointer>(open val pid: Int, open val errorClass: Class<E>, open val pointerClass: Class<P>) {
     abstract val detail: String
 
     abstract fun readMemory(address: Long, size: Long): Triple<P?, E?, Long?>
+    abstract fun writeMemory(address: Long, data: Pointer, size: Long): Pair<E?, Long?>
     abstract fun deallocateOurMemory(pointer: P): E?
 
     abstract fun getNextRegion(address: Long): Pair<MemoryRegion?, E?>
@@ -58,6 +61,24 @@ abstract class MemoryAccessor<E: Any, P: Pointer>(open val pid: Int, open val er
 
     open fun readInts(vararg addresses: Long): Map<Long, Pair<Int?, E?>> =
             addresses.map { addr -> addr to readInt(addr) }.toMap()
+
+    //Override if possible, this is likely slow
+    open fun writeMemory(address: Long, data: ByteBuffer): Pair<E?, Long?> {
+        val mem = Memory(data.remaining().toLong())
+
+        for (i in 0L until data.remaining())
+            mem.setByte(i, data.get())
+
+        return writeMemory(address, mem, mem.size())
+    }
+
+    open fun writeMemory(address: Long, data: ByteArray): Pair<E?, Long?> {
+        val mem = Memory(data.size.toLong())
+
+        mem.write(0, data, 0, data.size)
+
+        return writeMemory(address, mem, mem.size())
+    }
 
     companion object {
         fun accessorForSystem(pid: Int): MemoryAccessor<*, *> {

@@ -4,6 +4,7 @@ import com.sun.jna.*
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.LongByReference
 import com.sun.jna.ptr.PointerByReference
+import java.nio.ByteBuffer
 
 interface SystemB: Library {
     companion object {
@@ -37,7 +38,8 @@ interface SystemB: Library {
     fun getpid(): Int
 
     fun mach_vm_read(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
-    fun mach_vm_write(target_task: Int, address: Long, size: Long, data: PointerByReference, data_count: LongByReference): Int
+    fun mach_vm_write(target_task: Int, address: Long, data: ByteBuffer, data_count: Long): Int
+    fun mach_vm_write(target_task: Int, address: Long, data: Pointer, data_count: Long): Int
 
     fun mach_vm_allocate(target_task: Int, address: LongByReference, size: Long, flags: Int): Int
     fun mach_vm_deallocate(target_task: Int, address: Long, size: Long): Int

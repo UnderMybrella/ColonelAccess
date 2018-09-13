@@ -32,6 +32,15 @@ open class WindowsMemoryAccessor(pid: Int) : MemoryAccessor<Int, WinMemory>(pid,
         return Triple(null, Colonel32.INSTANCE.GetLastError(), 0L)
     }
 
+    override fun writeMemory(address: Long, data: Pointer, size: Long): Pair<Int?, Long?> {
+        val written = IntByReference()
+        if (Colonel32.INSTANCE.WriteProcessMemory(process, Pointer(baseAddress + address), data, size.toInt(), written)) {
+            return null to written.value.toLong()
+        } else {
+            return Colonel32.INSTANCE.GetLastError() to written.value.toLong()
+        }
+    }
+
     override fun deallocateOurMemory(pointer: WinMemory): Int? {
         pointer.dispose()
 

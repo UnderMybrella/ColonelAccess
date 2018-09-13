@@ -1,5 +1,6 @@
 package org.abimon.colonelAccess.osx
 
+import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.LongByReference
 import com.sun.jna.ptr.PointerByReference
@@ -7,6 +8,7 @@ import org.abimon.colonelAccess.handle.MemoryAccessor
 import org.abimon.colonelAccess.handle.MemoryRegion
 import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
+import java.nio.ByteBuffer
 
 open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>(pid, KernReturn::class.java, MacOSPointer::class.java) {
     protected val task: Int = run {
@@ -47,6 +49,23 @@ open class OSXMemoryAccessor(pid: Int): MemoryAccessor<KernReturn, MacOSPointer>
         } else {
             return Triple(null, allocateResponse, null)
         }
+    }
+
+    override fun writeMemory(address: Long, data: Pointer, size: Long): Pair<KernReturn?, Long?> {
+        val kret = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_write(task, address, data, size) and 0x000000FF)
+
+        if (kret == KernReturn.KERN_SUCCESS)
+            return kret to size
+        return kret to null
+    }
+
+    override fun writeMemory(address: Long, data: ByteBuffer): Pair<KernReturn?, Long?> {
+        val size = data.remaining().toLong()
+        val kret = KernReturn.valueOf(SystemB.INSTANCE.mach_vm_write(task, address, data, size) and 0x000000FF)
+
+        if (kret == KernReturn.KERN_SUCCESS)
+            return kret to size
+        return kret to null
     }
 
     override fun readInt(address: Long): Pair<Int?, KernReturn?> {

@@ -1,5 +1,6 @@
 package org.abimon.colonelAccess.macos
 
+import com.sun.jna.Memory
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.LongByReference
 import com.sun.jna.ptr.PointerByReference
@@ -10,6 +11,8 @@ import org.abimon.colonelAccess.osx.VMRegionFlavor
 import org.abimon.colonelAccess.osx.structs.VMRegionBasicInfo
 import org.abimon.colonelAccess.osx.structs.VMRegionSubmapInfo64
 import org.junit.Test
+import java.nio.ByteBuffer
+import java.util.*
 
 class SystemBTests {
 
@@ -119,5 +122,32 @@ class SystemBTests {
 
         val kret = KernReturn.valueOf(systemB.mach_vm_remap(task, newAddress, size.value, 0L, 1, task, address.value, false, curProtection, maxProtection, VMInherit.VM_INHERIT_SHARE.code))
         println(kret)
+    }
+
+    @Test
+    fun mach_vm_write() {
+        val systemB = SystemB.SAFE_INSTANCE
+        if (systemB == null) {
+            println("Not running on MacOS, returning")
+            return
+        }
+
+        val memory = Memory(1024)
+        val addr = Memory.nativeValue(memory)
+
+        val data = ByteBuffer.allocate(1024)
+
+        val rng = Random()
+        for (i in 0 until 1024) {
+            data.put((rng.nextInt() and 0xFF).toByte())
+        }
+
+        println(memory.dump())
+
+        data.rewind()
+
+        println(systemB.mach_vm_write(systemB.mach_task_self(), addr, data, 1024))
+
+        println(memory.dump())
     }
 }
